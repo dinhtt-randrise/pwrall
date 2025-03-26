@@ -30,7 +30,7 @@
 #  -------------------------------
 #
 # "Power Ball Predictor" is distributed under Apache-2.0 license
-# [ https://github.com/dinhtt-randrise/orottick4/blob/main/LICENSE ]
+# [ https://github.com/dinhtt-randrise/pwrall/blob/main/LICENSE ]
 #
 # ------------------------------------------------------------ #
 
