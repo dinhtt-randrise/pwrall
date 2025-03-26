@@ -1001,7 +1001,7 @@ class PwrallSimulator:
             return None
             
         cdf = pd.DataFrame(rows)
-        cdf = cdf.sort_value(by=['buy_date'], ascending=[False])
+        cdf = cdf.sort_values(by=['buy_date'], ascending=[False])
 
         text = '''
   -------------------------------
