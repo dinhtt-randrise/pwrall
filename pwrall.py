@@ -73,9 +73,9 @@ class PwrallSimulator:
         self.cache_reproduce_one = {}
         self.cache_capture = {}
 
-        self.debug_on = True
-        self.debug_gn_on = True
-        self.debug_cs_on = True
+        self.debug_on = False
+        self.debug_gn_on = False
+        self.debug_cs_on = False
 
         os.system(f'mkdir -p "{load_cache_dir}"')
         self.load_cache_dir = load_cache_dir
@@ -737,7 +737,11 @@ class PwrallSimulator:
         '''
         print(text)
 
-        self.save_cache()
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
         
         return zdf, json_pred, pdf
 
@@ -896,4 +900,115 @@ class PwrallSimulator:
 
         return odf, more
 
+    def build_cache(self, v_buy_date, cache_cnt = -1, buffer_dir = '/kaggle/buffers/pwrall', data_df = None, runtime = None):
+        self.print_heading()
+            
+        text = '''
+====================================
+            BUILD CACHE
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        v_data_df_is_none = False
+        if data_df is None:
+            v_data_df_is_none = True
+
+        v_draw_date = self.previous_dow(v_buy_date)
+        d1 = datetime.strptime(v_draw_date, "%Y.%m.%d")
+        d2 = d1 + timedelta(minutes=int(+(1) * (60 * 24)))
+        v_buy_date = d2.strftime('%Y.%m.%d')  
+        v_draw_date = self.next_dow(v_draw_date)
+        
+        print(f'[BUFFER_DIR] {buffer_dir}')
+        print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
+        print(f'[DRAW_DATE] {v_draw_date}')
+        print(f'[BUY_DATE] {v_buy_date}')
+        print(f'[CACHE_CNT] {cache_cnt}')
+        print(f'[RUNTIME] {runtime}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        if data_df is None:
+            data_df = self.download_drawing(buffer_dir, v_buy_date)
+            if data_df is None:
+                return None
+                
+        start_time = time.time()
+        ddf = data_df[data_df['buy_date'] <= v_buy_date]
+        ddf = ddf[ddf['w'] >= 0]
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        if cache_cnt > 0:
+            if len(ddf) > cache_cnt:
+                ddf = ddf[:cache_cnt]
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+
+        keycheck = {}
+        sz = len(ddf)
+        for ri in range(len(ddf)):
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+                    
+            w = ddf['w'].iloc[ri]
+            n = ddf['n'].iloc[ri]
+            date = ddf['date'].iloc[ri]
+            sim_seed, sim_cnt = self.capture(w, n)
+
+            print(f'=> [BC] {date} : {ri} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt}')
+
+            if ri % 1000 == 0:
+                try:
+                    self.save_cache()
+                except Exception as e:
+                    msg = str(e)
+                    print(f'=> [E] {msg}')
+                
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
+        
+        rows = []
+        for key in self.cache_capture.keys():
+            fds = key.split('_')
+            w = int(fds[0])
+            n = int(fds[1])
+            fds = self.cache_capture[key]
+            sim_seed = fds[0]
+            sim_cnt = fds[1]
+            df = ddf[(ddf['w'] == w)&(ddf['n'] == n)]
+            if len(df) == 0:
+                continue
+            date = df['date'].iloc[0]
+            buy_date = df['buy_date'].iloc[0]
+            next_date = df['next_date'].iloc[0]
+            rw = {'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': w, 'n': n, 'sim_seed': sim_seed, 'sim_cnt': sim_cnt}
+            rows.append(rw)
+
+        if len(rows) == 0:
+            return None
+            
+        cdf = pd.DataFrame(rows)
+        cdf = cdf.sort_value(by=['buy_date'], ascending=[False])
+
+        text = '''
+  -------------------------------
+            BUILD CACHE
+====================================
+        '''
+        print(text)
+
+        return cdf
 # ------------------------------------------------------------ #
