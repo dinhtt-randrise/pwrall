@@ -67,15 +67,26 @@ M5P_CNT = 3
 M5P_VRY = True
 LOAD_CACHE_DIR = '/kaggle/working'
 SAVE_CACHE_DIR = '/kaggle/working'
+CACHE_CNT = -1
 
 METHOD = 'simulate'
 #METHOD = 'observe'
 #METHOD = 'observe_range'
 #METHOD = 'download'
+#METHOD = 'build_cache'
 
 #----------#
 
 pwrl = vpwrl.PwrallSimulator(PRD_SORT_ORDER, HAS_STEP_LOG, M5P_OBS, M5P_CNT, M5P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
+
+if METHOD == 'build_cache':
+    cdf = pwrl.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, DATA_DF, RUNTIME)
+    if cdf is not None:
+        try:
+            cdf.to_csv(f'/kaggle/working/pb-cache-{BUY_DATE}.csv', index=False)
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
 
 if METHOD == 'simulate':
     zdf, json_pred, pdf = pwrl.simulate(BUY_DATE, BUFFER_DIR, DATA_DF, DATE_CNT, TCK_CNT, RUNTIME)
