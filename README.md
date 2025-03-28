@@ -24,6 +24,8 @@ draw by simulating computerized lottery drawing.
 
 + GitHub: https://pwrall.com/github
 
++ Lottery: https://pwrall.com/lotte
+
 
 ====================================
             HOW TO USE
