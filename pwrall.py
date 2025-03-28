@@ -16,6 +16,8 @@
 #
 # + GitHub: https://pwrall.com/github
 #
+# + Lottery: https://pwrall.com/lotte
+#
 #
 #====================================
 #            Copyright
