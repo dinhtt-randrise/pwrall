@@ -1004,7 +1004,7 @@ class PwrallSimulator:
                     break
                     
                 date_2 = cdf['date'].iloc[rib]
-                sim_cnt = cdf['sim_seed'].iloc[rib]
+                sim_cnt = cdf['sim_cnt'].iloc[rib]
                 p = self.reproduce_one(sim_seed, sim_cnt)
                 li += 1
                 if li % 1000 == 0:
