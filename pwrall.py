@@ -1005,9 +1005,13 @@ class PwrallSimulator:
                     
                 date_2 = cdf['date'].iloc[rib]
                 sim_cnt = cdf['sim_cnt'].iloc[rib]
+
+                if sim_seed < 0 or sim_cnt < 0:
+                    continue
+
                 p = self.reproduce_one(sim_seed, sim_cnt)
                 li += 1
-                if li % 200 == 0:
+                if li % 50 == 0:
                     print(f'=> [BC2] {date_1}, {date_2} : {li} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt} -> {p}')
                 
         try:
